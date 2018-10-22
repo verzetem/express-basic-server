@@ -25,6 +25,9 @@ app.get('/characters/:id', (req, res) => {
   // Grab the id of the character we want from the request URL parameters
   const id = req.params.id
   
+  if (typeof id !== number) {
+    next()
+  }
   // Use that id to find the right character in our data
 
   // FOR loop approach
@@ -47,5 +50,12 @@ app.get('/characters/:id', (req, res) => {
 // app.get('/characters/:id', (req, res, next) => {
 //   res.json(characters[req.params.id - 1])
 // })
+
+app.post('/characters', (req, res) => {
+  const body = req.body
+  console.log(req.body)
+  characters.push(body)
+  res.json(characters)
+})
 
 app.listen(port, () => console.log('Server running on port 3000'))
