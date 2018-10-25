@@ -1,9 +1,19 @@
 const express = require('express')
+const bodyParser = require('body-parser')
 const app = express()
 let port = 3000
 
-// Data
-const characters = require('./data.json')
+
+
+// Router imports
+const charactersRoutes = require('./routes/characters')
+
+
+// General middleware
+  // Applied to all requests
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: false }))
+
 
 // Basic GET route that responds with emoji or something
   // Lets us know the server is working
@@ -11,51 +21,29 @@ app.get('/', (req, res) => {
   res.send('😈😈😈😈😈')
 })
 
-// GET all route
-  // Send back all characters, with a root key of 'characters'
-app.get('/characters', (req, res) => {
-  res.json({ characters: characters })
-})
+//Any requests that START with /characters, send to this router file
+app.use('/characters', charactersRoutes)
 
-// GET one route
-  // Sends back a single character from the data
-  // Use route parameters
-  // Has a root key of 'character'
-app.get('/characters/:id', (req, res) => {
-  // Grab the id of the character we want from the request URL parameters
-  const id = req.params.id
-  
-  if (typeof id !== number) {
-    next()
-  }
-  // Use that id to find the right character in our data
 
-  // FOR loop approach
-  // for (i = 0; i < characters.length; i++) {
-  //   if (characters[i].id == id) {
-  //     res.json({character: characters[i]})
-  //   }
-  // }
 
-  // FILTER approach
-  const character = characters.filter(character => {
-    return character.id == id
-  })[0]
 
-  // Respond with the correct character
-  res.json({ character: character })
-})
+// Error handlers as final use case if routes don't match or if errors are generated
+  // 404
+app.use(notFound)
+  // General purpose 'catch' all errors
+app.use(errorHandler)
 
-// Clever but fragile approach accessing the characters array by index
-// app.get('/characters/:id', (req, res, next) => {
-//   res.json(characters[req.params.id - 1])
-// })
 
-app.post('/characters', (req, res) => {
-  const body = req.body
-  console.log(req.body)
-  characters.push(body)
-  res.json(characters)
-})
+function notFound(req, res, next) {
+  res.status(404).send({ error: 'Not found!', status: 404, url: req.originalUrl })
+}
+
+// eslint-disable-next-line
+function errorHandler(err, req, res, next) {
+  console.error('ERROR', err)
+  const stack = process.env.NODE_ENV !== 'production' ? err.stack : undefined
+  res.status(500).send({ error: err.message, stack, url: req.originalUrl })
+}
+
 
 app.listen(port, () => console.log('Server running on port 3000'))
