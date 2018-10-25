@@ -18,7 +18,7 @@ app.use(bodyParser.urlencoded({ extended: false }))
 // Basic GET route that responds with emoji or something
   // Lets us know the server is working
 app.get('/', (req, res) => {
-  res.send('😈😈😈😈😈')
+  res.redirect('/characters')
 })
 
 //Any requests that START with /characters, send to this router file
